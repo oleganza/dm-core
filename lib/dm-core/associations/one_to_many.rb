@@ -72,7 +72,7 @@ module DataMapper
       class Proxy
         include Assertions
 
-        instance_methods.each { |m| undef_method m unless %w[ __id__ __send__ class kind_of? respond_to? assert_kind_of should should_not instance_variable_set instance_variable_get ].include?(m) }
+        instance_methods.each { |m| undef_method m unless %w[ __id__ __send__ class kind_of? respond_to? assert_kind_of should should_not instance_variable_set instance_variable_get ].include?(m.to_s) }
 
         # FIXME: remove when RelationshipChain#get_children can return a Collection
         def all(query = {})
@@ -306,11 +306,8 @@ module DataMapper
         end
 
         def method_missing(method, *args, &block)
-          results = children.__send__(method, *args, &block) if children.respond_to?(method)
-
-          return self if LazyArray::RETURN_SELF.include?(method) && results.kind_of?(Array)
-
-          results
+          results = children.send(method, *args, &block)
+          results.equal?(children) ? self : results
         end
       end # class Proxy
     end # module OneToMany

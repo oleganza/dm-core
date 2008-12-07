@@ -51,10 +51,9 @@ module DataMapper
       @limit        = other.limit         unless other.limit         == nil
       @order        = other.order         unless other.order         == model.default_order
       @add_reversed = other.add_reversed? unless other.add_reversed? == false
+      @fields       = other.fields        unless other.fields        == @properties.defaults
       @links        = other.links         unless other.links         == []
       @includes     = other.includes      unless other.includes      == []
-
-      @fields == @properties.defaults ? @fields = other.fields : @fields |= other.fields
 
       update_conditions(other)
 
@@ -574,7 +573,7 @@ module DataMapper
     class Path
       include Assertions
 
-   %w[ id type ].each { |m| undef_method m }
+      instance_methods.each { |m| undef_method m if %w[ id type ].include?(m.to_s) }
 
       attr_reader :relationships, :model, :property, :operator
 
